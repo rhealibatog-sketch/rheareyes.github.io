@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Daily Devotion | Bible Verse App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f0f4fa 0%, #e6edf4 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* main app container */
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 42px;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(0px);
+        }
+
+        .screen {
+            padding: 28px 24px 32px;
+            animation: fadeSlide 0.3s ease-out;
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* cards & input styles */
+        .card {
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02);
+            padding: 24px 20px;
+            transition: all 0.2s;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 28px;
+            font-size: 15px;
+            background: #ffffff;
+            transition: all 0.2s;
+            outline: none;
+            color: #1e293b;
+        }
+
+        .input-field:focus {
+            border-color: #4f7dcf;
+            box-shadow: 0 0 0 3px rgba(79, 125, 207, 0.2);
+        }
+
+        .btn {
+            border: none;
+            border-radius: 40px;
+            padding: 12px 18px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .btn-primary {
+            background: #3b6cb7;
+            color: white;
+            box-shadow: 0 4px 8px rgba(59, 108, 183, 0.2);
+        }
+        .btn-primary:hover { background: #2c5a9e; transform: translateY(-1px);}
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #3b6cb7;
+            border: 1px solid #e2edff;
+        }
+        .btn-secondary:hover { background: #e6edf8;}
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+        }
+
+        .btn-danger-light {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .feeling-badge {
+            background: #f8fafc;
+            border-radius: 60px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            transition: 0.1s;
+            cursor: pointer;
+            color: #2c5f8a;
+            border: 1px solid #e2edff;
+        }
+        .feeling-badge:hover {
+            background: #eef4ff;
+            transform: translateY(-2px);
+        }
+
+        .verse-card {
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 22px 18px;
+            border: 1px solid #eff3f8;
+            box-shadow: 0 12px 20px -12px rgba(0, 0, 0, 0.08);
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fade 0.2s;
+        }
+        .popup-card {
+            background: white;
+            max-width: 85%;
+            width: 360px;
+            border-radius: 36px;
+            padding: 24px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 40px 60px -20px black;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+            gap: 10px;
+        }
+
+        .profile-preview {
+            width: 96px;
+            height: 96px;
+            background: #eef2ff;
+            border-radius: 48px;
+            object-fit: cover;
+            margin: 0 auto;
+            border: 3px solid white;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        hr {
+            margin: 16px 0;
+            border: none;
+            border-top: 1.5px solid #ecf3f9;
+        }
+
+        .text-center { text-align: center; }
+        .text-muted { color: #6c7a91; font-size: 13px; }
+        .font-bold { font-weight: 700; }
+        .mt-2 { margin-top: 12px; }
+        .mb-2 { margin-bottom: 12px; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .gap-2 { gap: 12px; }
+        .w-100 { width: 100%; }
+    </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+    // ---------- DATABASE (localStorage) ----------
+    let users = {};    // structure: { email: { password, first_name, middle_name, last_name, profile_pic } }
+
+    function loadDatabase() {
+        const stored = localStorage.getItem("dailydevotion_users");
+        if (stored) {
+            users = JSON.parse(stored);
+        } else {
+            // demo seed account
+            users = {
+                "user@example.com": {
+                    password: "password123",
+                    first_name: "Demo",
+                    middle_name: "",
+                    last_name: "User",
+                    profile_pic: "https://ui-avatars.com/api/?background=3b6cb7&color=fff&name=Demo+User"
+                }
+            };
+            saveDatabase();
+        }
+    }
+
+    function saveDatabase() {
+        localStorage.setItem("dailydevotion_users", JSON.stringify(users));
+    }
+
+    // helper: email validation
+    function isValidEmail(email) {
+        if (!email || email.includes(" ")) return false;
+        const parts = email.split("@");
+        if (parts.length !== 2) return false;
+        if (!parts[1].includes(".")) return false;
+        return true;
+    }
+
+    // ----- Devotion Data & Feelings -----
+    const devotions = [
+        { reference: "John 3:16", verse: "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.", command: "Believe in Jesus Christ.", promise: "Whoever believes will have eternal life.", warning: "Rejecting Christ leads to spiritual death.", how_to: "Trust Jesus as Lord and Savior." },
+        { reference: "Philippians 4:13", verse: "I can do all things through Christ which strengtheneth me.", command: "Depend on Christ.", promise: "Christ gives strength.", warning: "Self-reliance can fail.", how_to: "Pray and trust Christ daily." },
+        { reference: "Jeremiah 29:11", verse: "For I know the thoughts that I think toward you, saith the Lord, thoughts of peace, and not of evil, to give you an expected end.", command: "Trust God's plan.", promise: "God gives hope and a future.", warning: "Ignoring God leads to confusion.", how_to: "Seek God in prayer." },
+        { reference: "Psalm 23:1", verse: "The Lord is my shepherd; I shall not want.", command: "Follow the Lord.", promise: "God provides for your needs.", warning: "Without God we are spiritually lost.", how_to: "Let God guide your life." },
+        { reference: "Matthew 6:33", verse: "But seek ye first the kingdom of God, and his righteousness; and all these things shall be added unto you.", command: "Put God first.", promise: "God will provide what you need.", warning: "Worldly priorities lead to worry.", how_to: "Focus on spiritual life." },
+        { reference: "Romans 8:28", verse: "And we know that all things work together for good to them that love God, to them who are the called according to his purpose.", command: "Love God faithfully.", promise: "God works everything for good.", warning: "Without God life lacks purpose.", how_to: "Remain faithful to Him." }
+    ];
+
+    const feelingsMap = {
+        "Happy": [...devotions],
+        "Sad": [...devotions].reverse(),
+        "Angry": devotions.filter((_, idx) => idx % 2 === 0),
+        "Anxious": devotions.filter((_, idx) => idx % 2 === 1),
+        "Peaceful": [...devotions]
+    };
+
+    const levelsData = {
+        "Level 1": [
+            { verse: "For God so loved the world that he gave his only begotten ____.", answer: "son" },
+            { verse: "The Lord is my ____; I shall not want.", answer: "shepherd" },
+            { verse: "Trust in the Lord with all thine ____.", answer: "heart" }
+        ],
+        "Level 2": [
+            { verse: "I can do all things through ____ which strengtheneth me.", answer: "christ" },
+            { verse: "Now ____ is the substance of things hoped for.", answer: "faith" },
+            { verse: "Lean not unto thine own ____.", answer: "understanding" }
+        ],
+        "Level 3": [
+            { verse: "Fear thou not; for I am with ____.", answer: "thee" },
+            { verse: "All things work together for ____.", answer: "good" },
+            { verse: "The ____ of the Lord is the beginning of wisdom.", answer: "fear" }
+        ]
+    };
+
+    // UI state
+    let currentUser = null;
+    let currentDevotion = null;
+    let gameCurrentLevel = null;
+    let gameQuestions = [];
+    let gameIndex = 0;
+    let gamePopupCallback = null;
+
+    // helper to get daily devotion (based on minutes)
+    function getDailyDevotion() {
+        const minutes = Math.floor(Date.now() / 60000);
+        const idx = minutes % devotions.length;
+        return { ...devotions[idx] };
+    }
+
+    // ------ Render App ------
+    function render() {
+        const root = document.getElementById("app");
+        if (!currentUser) {
+            root.innerHTML = renderLoginScreen();
+            attachLoginEvents();
+        } else {
+            root.innerHTML = renderMainApp();
+            attachMainEvents();
+        }
+    }
+
+    function renderLoginScreen() {
+        return `
+            <div class="app-container">
+                <div class="screen">
+                    <div class="text-center" style="margin-bottom: 28px;">
+                        <h1 style="font-size: 34px; color: #1e2a3e;">🙏 Daily<br>Devotion</h1>
+                        <p class="text-muted" style="margin-top: 6px;">Access your spiritual journey</p>
+                    </div>
+                    <div class="card" style="padding: 24px;">
+                        <div style="margin-bottom: 16px;">
+                            <input type="email" id="loginEmail" class="input-field" placeholder="Email Address" autocomplete="email">
+                        </div>
+                        <div style="position: relative; margin-bottom: 20px;">
+                            <input type="password" id="loginPassword" class="input-field" placeholder="Password" autocomplete="current-password">
+                            <span id="togglePassBtn" style="position: absolute; right: 16px; top: 12px; cursor: pointer;">👁️</span>
+                        </div>
+                        <button id="loginBtn" class="btn btn-primary w-100" style="margin-bottom: 12px;">Login</button>
+                        <button id="goToRegisterBtn" class="btn btn-secondary w-100">Create Account</button>
+                        <div id="loginErrorMsg" class="text-muted text-center mt-2" style="color:#c2410c; font-size:13px;"></div>
+                        <div class="text-center mt-2"><span class="text-muted">demo: user@example.com / password123</span></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderRegisterScreen() {
+        return `
+            <div class="app-container">
+                <div class="screen">
+                    <h2 style="font-size: 28px; color:#1e2a3e; text-align:center;">Create Account</h2>
+                    <div class="card" style="margin-top: 12px;">
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <input type="text" id="regFirstName" class="input-field" placeholder="First Name *">
+                            <input type="text" id="regMiddleName" class="input-field" placeholder="Middle Name (Optional)">
+                            <input type="text" id="regLastName" class="input-field" placeholder="Last Name *">
+                            <input type="email" id="regEmail" class="input-field" placeholder="Email Address *">
+                            <div style="position: relative;">
+                                <input type="password" id="regPassword" class="input-field" placeholder="Password (min 6 chars, 1 number)">
+                                <span id="toggleRegPass" style="position: absolute; right: 16px; top: 12px; cursor: pointer;">👁️</span>
+                            </div>
+                            <button id="registerSubmitBtn" class="btn btn-primary w-100">Register</button>
+                            <button id="backToLoginBtn" class="btn btn-secondary w-100">Back to Login</button>
+                            <div id="regMessage" class="text-center text-muted mt-1"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderMainApp() {
+        const userData = users[currentUser];
+        const daily = getDailyDevotion();
+        currentDevotion = daily;
+        const feelings = ["Happy", "Sad", "Angry", "Anxious", "Peaceful"];
+        return `
+            <div class="app-container">
+                <div class="screen" style="padding-top: 18px;">
+                    <div class="flex-between" style="margin-bottom: 16px;">
+                        <h2 style="font-size: 28px; color:#1f2b38;">Daily<span style="color:#3b6cb7;"> Devotion</span></h2>
+                        <button id="menuBtn" class="btn btn-secondary" style="padding: 8px 16px;">☰ Menu</button>
+                    </div>
+                    <div class="verse-card" style="margin-bottom: 20px;">
+                        <div class="text-center"><span style="font-weight: 700; color:#3b6cb7;">${daily.reference}</span></div>
+                        <div class="text-center mt-2" style="font-size: 16px; line-height:1.4; color:#1f2e45;">“${daily.verse}”</div>
+                    </div>
+                    <div class="grid-2" style="margin-bottom: 20px;">
+                        ${feelings.map(f => `<div class="feeling-badge" data-feeling="${f}">${f}</div>`).join('')}
+                    </div>
+                    <button id="readFullDevotionBtn" class="btn btn-primary w-100" style="margin-bottom: 12px;">📖 Read Full Devotion</button>
+                    <button id="openGameBtn" class="btn btn-secondary w-100" style="margin-bottom: 12px;">✝️ Bible Verse Game</button>
+                    <button id="logoutMainBtn" class="btn btn-danger-light w-100">🚪 Logout</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Menus & profile popup
+    function showMenuPopup() {
+        const userData = users[currentUser];
+        const popupDiv = document.createElement('div');
+        popupDiv.className = 'popup-overlay';
+        popupDiv.innerHTML = `
+            <div class="popup-card">
+                <h3 style="text-align:center; margin-bottom:16px;">Menu</h3>
+                <button id="profileMenuItem" class="btn btn-secondary w-100" style="margin-bottom: 10px;">👤 My Profile</button>
+                <button id="accountMenuItem" class="btn btn-secondary w-100" style="margin-bottom: 10px;">⚙️ Account Settings</button>
+                <button id="menuLogoutBtn" class="btn btn-danger-light w-100">Logout</button>
+                <button id="closeMenuPopup" class="btn btn-outline w-100 mt-2">Close</button>
+            </div>
+        `;
+        document.body.appendChild(popupDiv);
+        const close = () => popupDiv.remove();
+        popupDiv.querySelector('#closeMenuPopup').onclick = close;
+        popupDiv.querySelector('#menuLogoutBtn').onclick = () => { logout(); close(); };
+        popupDiv.querySelector('#profileMenuItem').onclick = () => { close(); showProfilePopup(); };
+        popupDiv.querySelector('#accountMenuItem').onclick = () => { close(); showAccountPopup(); };
+    }
+
+    function showProfilePopup() {
+        const user = users[currentUser];
+        const popup = document.createElement('div');
+        popup.className = 'popup-overlay';
+        popup.innerHTML = `
+            <div class="popup-card text-center">
+                <img src="${user.profile_pic}" class="profile-preview" id="profileImgPreview" onerror="this.src='https://ui-avatars.com/api/?background=3b6cb7&color=fff&name=${user.first_name}+${user.last_name}'">
+                <h3 class="mt-2">${user.first_name} ${user.middle_name ? user.middle_name + " " : ""}${user.last_name}</h3>
+                <p class="text-muted">${currentUser}</p>
+                <hr>
+                <button id="changePicBtn" class="btn btn-primary w-100">📸 Change Profile Picture</button>
+                <button id="closeProfileBtn" class="btn btn-outline w-100 mt-2">Close</button>
+            </div>
+        `;
+        document.body.appendChild(popup);
+        const close = () => popup.remove();
+        popup.querySelector('#closeProfileBtn').onclick = close;
+        popup.querySelector('#changePicBtn').onclick = () => {
+            const fakeUrl = prompt("Enter image URL (or leave for avatar):", user.profile_pic);
+            if (fakeUrl && fakeUrl.trim()) {
+                users[currentUser].profile_pic = fakeUrl.trim();
+                saveDatabase();
+                const img = popup.querySelector('#profileImgPreview');
+                if (img) img.src = fakeUrl.trim();
+                showToast("Profile picture updated!");
+            } else {
+                const avatar = `https://ui-avatars.com/api/?background=3b6cb7&color=fff&name=${encodeURIComponent(user.first_name + "+" + user.last_name)}`;
+                users[currentUser].profile_pic = avatar;
+                saveDatabase();
+                popup.querySelector('#profileImgPreview').src = avatar;
+                showToast("Avatar updated");
+            }
+        };
+    }
+
+    function showAccountPopup() {
+        const user = users[currentUser];
+        const popup = document.createElement('div');
+        popup.className = 'popup-overlay';
+        popup.innerHTML = `
+            <div class="popup-card">
+                <h3 class="text-center">Account Details</h3>
+                <div style="margin-top: 16px;">
+                    <p><strong>First Name:</strong> ${user.first_name}</p>
+                    <p><strong>Middle Name:</strong> ${user.middle_name || '—'}</p>
+                    <p><strong>Last Name:</strong> ${user.last_name}</p>
+                    <p><strong>Email:</strong> ${currentUser}</p>
+                    <p><strong>Password:</strong> ${'•'.repeat(user.password.length)}</p>
+                </div>
+                <button id="closeAccountBtn" class="btn btn-primary w-100 mt-2">Close</button>
+            </div>
+        `;
+        document.body.appendChild(popup);
+        popup.querySelector('#closeAccountBtn').onclick = () => popup.remove();
+    }
+
+    function showFullDevotion() {
+        const d = currentDevotion;
+        const text = `VERSE\n${d.reference}\n${d.verse}\n\n✝️ GOD'S COMMAND\n${d.command}\n\n✨ GOD'S PROMISE\n${d.promise}\n\n⚠️ GOD'S WARNING\n${d.warning}\n\n📖 HOW TO DEVOTE\n${d.how_to}`;
+        const popup = document.createElement('div');
+        popup.className = 'popup-overlay';
+        popup.innerHTML = `
+            <div class="popup-card" style="max-width:400px;">
+                <div style="white-space: pre-line; font-size:14px; line-height:1.5; margin-bottom:20px;">${text}</div>
+                <button id="closeDevotion" class="btn btn-primary w-100">Close</button>
+            </div>
+        `;
+        document.body.appendChild(popup);
+        popup.querySelector('#closeDevotion').onclick = () => popup.remove();
+    }
+
+    function showFeelingVerse(feeling) {
+        const versesList = feelingsMap[feeling] || devotions;
+        const minuteIdx = Math.floor(Date.now() / 60000) % versesList.length;
+        const verseItem = versesList[minuteIdx];
+        const popup = document.createElement('div');
+        popup.className = 'popup-overlay';
+        popup.innerHTML = `
+            <div class="popup-card text-center">
+                <h3 style="color:#3b6cb7;">${feeling} &nbsp;🌸</h3>
+                <div class="verse-card mt-2" style="margin:12px 0;">
+                    <b>${verseItem.reference}</b>
+                    <p style="margin-top: 12px;">“${verseItem.verse}”</p>
+                </div>
+                <button id="closeFeelingPopup" class="btn btn-secondary w-100">Close</button>
+            </div>
+        `;
+        document.body.appendChild(popup);
+        popup.querySelector('#closeFeelingPopup').onclick = () => popup.remove();
+    }
+
+    function showLevelsGameMenu() {
+        const popup = document.createElement('div');
+        popup.className = 'popup-overlay';
+        popup.innerHTML = `
+            <div class="popup-card">
+                <h3 class="text-center">Select Level</h3>
+                <div style="display:flex; flex-direction:column; gap:12px; margin: 16px 0;">
+                    <button class="btn btn-primary" data-level="Level 1">🌟 Level 1</button>
+                    <button class="btn btn-secondary" data-level="Level 2">📘 Level 2</button>
+                    <button class="btn btn-secondary" data-level="Level 3">🔥 Level 3</button>
+                </div>
+                <button id="cancelGameMenu" class="btn btn-outline w-100">Cancel</button>
+            </div>
+        `;
+        document.body.appendChild(popup);
+        const close = () => popup.remove();
+        popup.querySelector('#cancelGameMenu').onclick = close;
+        popup.querySelectorAll('[data-level]').forEach(btn => {
+            btn.onclick = (e) => {
+                const level = btn.getAttribute('data-level');
+                close();
+                startGameLevel(level);
+            };
+        });
+    }
+
+    function startGameLevel(level) {
+        const questions = levelsData[level];
+        if (!questions) return;
+        gameCurrentLevel = level;
+        gameQuestions = [...questions];
+        gameIndex = 0;
+
+        const popup = document.createElement('div');
+        popup.className = 'popup-overlay';
+        popup.innerHTML = `
+            <div class="popup-card" style="width: 380px;">
+                <h3 class="text-center">${level} — Fill the Blank</h3>
+                <div id="gameVerseText" class="verse-card text-center" style="margin: 16px 0; font-size: 16px;">${questions[0].verse}</div>
+                <input type="text" id="gameAnswerInput" class="input-field" placeholder="Your answer..." autocomplete="off">
+                <button id="gameSubmitBtn" class="btn btn-primary w-100 mt-2">Submit</button>
+                <div id="gameResultMsg" class="text-center mt-2" style="font-weight:500;"></div>
+                <button id="gameExitBtn" class="btn btn-outline w-100 mt-2">Exit Game</button>
+            </div>
+        `;
+        document.body.appendChild(popup);
+        const closePopup = () => popup.remove();
+
+        const verseSpan = popup.querySelector('#gameVerseText');
+        const answerInput = popup.querySelector('#gameAnswerInput');
+        const resultDiv = popup.querySelector('#gameResultMsg');
+        const submitBtn = popup.querySelector('#gameSubmitBtn');
+        const exitBtn = popup.querySelector('#gameExitBtn');
+
+        function updateQuestion() {
+            if (gameIndex < gameQuestions.length) {
+                verseSpan.innerText = gameQuestions[gameIndex].verse;
+                answerInput.value = '';
+                resultDiv.innerText = '';
+                answerInput.disabled = false;
+                submitBtn.disabled = false;
+            } else {
+                resultDiv.innerText = '🎉 Level Complete! Great job! 🎉';
+                resultDiv.style.color = '#2b6e3c';
+                answerInput.disabled = true;
+                submitBtn.disabled = true;
+            }
+        }
+
+        function checkAnswer() {
+            if (gameIndex >= gameQuestions.length) return;
+            const userAns = answerInput.value.trim().toLowerCase();
+            const correct = gameQuestions[gameIndex].answer.toLowerCase();
+            if (userAns === correct) {
+                resultDiv.innerText = '✅ Correct!';
+                resultDiv.style.color = '#2b6e3c';
+                gameIndex++;
+                if (gameIndex < gameQuestions.length) {
+                    setTimeout(() => {
+                        updateQuestion();
+                    }, 800);
+                } else {
+                    updateQuestion();
+                }
+            } else {
+                resultDiv.innerText = '❌ Try again';
+                resultDiv.style.color = '#b91c1c';
+            }
+        }
+
+        submitBtn.onclick = checkAnswer;
+        exitBtn.onclick = closePopup;
+        updateQuestion();
+    }
+
+    function logout() {
+        currentUser = null;
+        render();
+    }
+
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.innerText = msg;
+        toast.style.position = 'fixed';
+        toast.style.bottom = '30px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.backgroundColor = '#1e293b';
+        toast.style.color = 'white';
+        toast.style.padding = '10px 20px';
+        toast.style.borderRadius = '40px';
+        toast.style.zIndex = '2000';
+        toast.style.fontSize = '14px';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
+    // event binding
+    function attachLoginEvents() {
+        const loginBtn = document.getElementById('loginBtn');
+        const goReg = document.getElementById('goToRegisterBtn');
+        const toggleBtn = document.getElementById('togglePassBtn');
+        const pwdField = document.getElementById('loginPassword');
+
+        if (toggleBtn) toggleBtn.onclick = () => pwdField.type = pwdField.type === 'password' ? 'text' : 'password';
+        if (loginBtn) loginBtn.onclick = () => {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pwd = document.getElementById('loginPassword').value.trim();
+            const errorDiv = document.getElementById('loginErrorMsg');
+            if (!isValidEmail(email)) { errorDiv.innerText = "Invalid email format"; return; }
+            if (!users[email]) { errorDiv.innerText = "Email not registered"; return; }
+            if (users[email].password !== pwd) { errorDiv.innerText = "Incorrect password"; return; }
+            currentUser = email;
+            errorDiv.innerText = "";
+            render();
+        };
+        if (goReg) goReg.onclick = () => {
+            const container = document.getElementById('app');
+            container.innerHTML = renderRegisterScreen();
+            attachRegisterEvents();
+        };
+    }
+
+    function attachRegisterEvents() {
+        const regBtn = document.getElementById('registerSubmitBtn');
+        const backBtn = document.getElementById('backToLoginBtn');
+        const toggleReg = document.getElementById('toggleRegPass');
+        const regPass = document.getElementById('regPassword');
+        if (toggleReg) toggleReg.onclick = () => regPass.type = regPass.type === 'password' ? 'text' : 'password';
+        if (backBtn) backBtn.onclick = () => { render(); };
+        if (regBtn) regBtn.onclick = () => {
+            const fname = document.getElementById('regFirstName').value.trim();
+            const mname = document.getElementById('regMiddleName').value.trim();
+            const lname = document.getElementById('regLastName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pwd = document.getElementById('regPassword').value.trim();
+            const msgDiv = document.getElementById('regMessage');
+            if (!fname || !lname) { msgDiv.innerText = "First and Last name required"; return; }
+            if (!isValidEmail(email)) { msgDiv.innerText = "Invalid email format"; return; }
+            if (pwd.length < 6) { msgDiv.innerText = "Password min 6 chars"; return; }
+            if (!/\d/.test(pwd)) { msgDiv.innerText = "Password must contain a number"; return; }
+            if (users[email]) { msgDiv.innerText = "Email already registered"; return; }
+            const avatar = `https://ui-avatars.com/api/?background=3b6cb7&color=fff&name=${encodeURIComponent(fname + '+' + lname)}`;
+            users[email] = {
+                password: pwd,
+                first_name: fname,
+                middle_name: mname,
+                last_name: lname,
+                profile_pic: avatar
+            };
+            saveDatabase();
+            msgDiv.style.color = '#2b6e3c';
+            msgDiv.innerText = "✅ Registered! Please login.";
+            setTimeout(() => { render(); }, 1500);
+        };
+    }
+
+    function attachMainEvents() {
+        document.getElementById('menuBtn')?.addEventListener('click', () => showMenuPopup());
+        document.getElementById('readFullDevotionBtn')?.addEventListener('click', () => showFullDevotion());
+        document.getElementById('openGameBtn')?.addEventListener('click', () => showLevelsGameMenu());
+        document.getElementById('logoutMainBtn')?.addEventListener('click', () => logout());
+        document.querySelectorAll('.feeling-badge').forEach(el => {
+            const feeling = el.getAttribute('data-feeling');
+            if (feeling) el.addEventListener('click', () => showFeelingVerse(feeling));
+        });
+    }
+
+    // initial load
+    loadDatabase();
+    render();
+</script>
+</body>
+</html>
